@@ -34,6 +34,7 @@
 
 #define MOVE_COL "rgba: 0 0 127 120"
 #define ATK_COL "rgba: 127 0 0 120"
+#define HEAL_COL "rgba: 70 127 10 120"
 
 enum {
 	GOOD_SIDE = 0,
@@ -49,6 +50,7 @@ struct special {
 	int range;
 	int type;
 	int amunition;
+	int power;
 	const char *name;
 };
 
@@ -89,11 +91,11 @@ static struct unit_type hoplite = {
 };
 
 static struct unit_type pritestess  = {
-	10, 1, 4, 0, GOOD_SIDE, pritestess_path, &(struct special){2, SPE_HEAL, 4, "heal"}
+	10, 1, 4, 0, GOOD_SIDE, pritestess_path, &(struct special){2, SPE_HEAL, 4, 3, "heal"}
 };
 
 static struct unit_type legioness = {
-	12, 1, 6, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, "pilum"}
+	12, 1, 6, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 8, "pilum"}
 };
 
 struct unit {
@@ -140,9 +142,12 @@ static int turn_state;
 	for (int idx_y = 0; idx_y < 6; ++idx_y)		\
 		for (int idx_x = 0; idx_x < 4; ++idx_x)
 
-static void handle_special(struct df *s);
-static void rm_button(struct df *s, int idx);
-static void init_buttom(struct df *df, int idx, const char *str, void (*callback)(struct df *));
+static void handle_special(struct df *);
+static void rm_button(struct df *, int);
+static void init_buttom(struct df *, int , const char *str, void (*)(struct df *));
+
+static void fill_square(struct df *, int, const char *,
+			_Bool (*)(struct df *, struct unit *, struct unit *), int);
 
 _Bool is_empty(struct df *s, struct unit *c, struct unit *o)
 {
@@ -152,6 +157,11 @@ _Bool is_empty(struct df *s, struct unit *c, struct unit *o)
 _Bool is_enemy(struct df *s, struct unit *c, struct unit *o)
 {
 	return o && c && c->side != o->side;
+}
+
+_Bool is_ally(struct df *s, struct unit *c, struct unit *o)
+{
+	return o && c && c->side == o->side;
 }
 
 static Entity *mk_case_rect(Entity *e, int x, int y, const char *col, Entity *extra)
@@ -237,13 +247,21 @@ static void normal_atk_mode(struct df *s)
 
 	s->is_spe_mode = 0;
 	rm_button(s, 0);
+	atk_squares_fill(s, u);
 	init_buttom(s, 0, u->spe.name, handle_special);
 }
 
 static void handle_special(struct df *s)
 {
+	struct unit *u = s->map[s->selected_y][s->selected_x];
+
 	s->is_spe_mode = 1;
 	rm_button(s, 0);
+	empty_osquare(s);
+	if (u->spe.type == SPE_HEAL)
+		fill_square(s, u->spe.range, HEAL_COL, is_ally, 2);
+	else
+		fill_square(s, u->spe.range, ATK_COL, is_enemy, 1);
 	init_buttom(s, 0, "normal\nattack", normal_atk_mode);
 	printf("handle special !\n");
 }
@@ -294,7 +312,7 @@ void *dungeon_fight_action(int nbArgs, void **args)
 			s->selected_y = cy;
 
 			atk_squares_fill(s, u);
-			if (u->spe.amunition)
+			if (u->spe.amunition && !u->has_atk)
 				init_buttom(s, 0, u->spe.name, handle_special);
 		} else if (cx == s->selected_x && cy == s->selected_y) {
 			unselect(s);
@@ -307,7 +325,8 @@ void *dungeon_fight_action(int nbArgs, void **args)
 				printf("attack\n");
 
 				struct unit *ou = s->map[cy][cx];
-				int roll = yuiRand() % su->t->atk_dice + 1;
+				int dice = s->is_spe_mode == 1 ? su->spe.power : su->t->atk_dice;
+				int roll = yuiRand() % dice + 1;
 				int dmg = roll;
 
 				while (roll == su->t->atk_dice) {
@@ -316,19 +335,31 @@ void *dungeon_fight_action(int nbArgs, void **args)
 					roll = yuiRand() % su->t->atk_dice + 1;
 				}
 				dmg -= ou->t->def;
-				printf("do dmg %d %d\n", dmg, ou->life);
+				printf("do dmg %d, dice %d\n", dmg, dice);
 				if (dmg > 0) {
 					ou->life -= dmg;
 					if (ou->life < 0)
 						remove_unit(s, ou, cx, cy);
 				}
 				su->has_atk = 1;
+				if (s->is_spe_mode) {
+					su->spe.amunition -= 1;
+				}
 			} else if (action == 0) {
 				s->map[cy][cx] = su;
 				s->map[sy][sx] = NULL;
 				ywCanvasObjSetPos(su->u, cx * CASE_W, cy * CASE_H);
 				printf("move\n");
 				su->has_move = 1;
+			} else if (action == 2) {
+				struct unit *ou = s->map[cy][cx];
+
+				if (ou && ou->life < ou->max_life) {
+					ou->life += yuiRand() % su->spe.power + 1;
+					su->spe.amunition -= 1;
+					if (ou->life > ou->max_life)
+						ou->life = ou->max_life;
+				}
 			}
 			unselect(s);
 		}
