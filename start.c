@@ -1,3 +1,4 @@
+
 /**        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  *                   Version 2, December 2004
  *
@@ -102,6 +103,8 @@ struct unit {
 	struct unit_type *t;
 	int life;
 	int max_life;
+	int x;
+	int y;
 	int side;
 	Entity *u;
 	int has_move;
@@ -133,10 +136,9 @@ struct df {
 	int selected_x;
 	int selected_y;
 	int is_spe_mode;
+	int turn_state;
 	struct button bottom_buttom[4];
 };
-
-static int turn_state;
 
 #define DF_MAP_FOR(idx_x, idx_y)			\
 	for (int idx_y = 0; idx_y < 6; ++idx_y)		\
@@ -145,6 +147,7 @@ static int turn_state;
 static void handle_special(struct df *);
 static void rm_button(struct df *, int);
 static void init_buttom(struct df *, int , const char *str, void (*)(struct df *));
+static void end_turn(struct df *s);
 
 static void fill_square(struct df *, int, const char *,
 			_Bool (*)(struct df *, struct unit *, struct unit *), int);
@@ -204,6 +207,19 @@ static void print_lifes(struct df *s)
 
 }
 
+static void move_to(struct df *s, struct unit *su, int cx, int cy)
+{
+	int sx = su->x, sy = su->y;
+
+	printf("move %d %d -> %d %d\n", sx, sy, cx, cy);
+	s->map[cy][cx] = su;
+	s->map[sy][sx] = NULL;
+	ywCanvasObjSetPos(su->u, cx * CASE_W, cy * CASE_H);
+	su->x = cx;
+	su->y = cy;
+	su->has_move = 1;
+}
+
 static _Bool can_select_unit(struct df *s, int x, int y)
 {
 	if (!s->map[y][x])
@@ -211,7 +227,7 @@ static _Bool can_select_unit(struct df *s, int x, int y)
 
 	struct unit *u = s->map[y][x];
 
-	return u->side == turn_state;
+	return u->side == s->turn_state;
 }
 
 static void empty_osquare(struct df *s)
@@ -266,6 +282,20 @@ static void handle_special(struct df *s)
 	printf("handle special !\n");
 }
 
+static int find_attackable(struct df *s, int cx, int cy, int range, struct unit **enemies)
+{
+	int ret = 0;
+
+	DF_MAP_FOR(ix, iy) {
+		int diff = abs(cx - ix) + abs(cy - iy);
+
+		if (diff && diff <= range && is_enemy(s, s->map[cy][cx], s->map[iy][ix])) {
+			enemies[ret++] = s->map[iy][ix];
+		}
+	}
+	return ret;
+}
+
 static void fill_square(struct df *s, int range, const char *col,
 			_Bool (*check)(struct df *, struct unit *, struct unit *), int type)
 {
@@ -282,6 +312,33 @@ static void fill_square(struct df *s, int range, const char *col,
 	}
 }
 
+void do_attack(struct df *s, struct unit *au,
+	       struct unit *ou)
+{
+	int ax = au->x, ay = au->y, ox = ou->x, oy = ou->y;
+	int dice = s->is_spe_mode == 1 ? au->spe.power : au->t->atk_dice;
+	int roll = yuiRand() % dice + 1;
+	int dmg = roll;
+
+	while (roll == au->t->atk_dice) {
+		printf("critical !\n");
+		dmg += roll;
+		roll = yuiRand() % au->t->atk_dice + 1;
+	}
+	dmg -= ou->t->def;
+	printf("do dmg %d, dice %d\n", dmg, dice);
+	if (dmg > 0) {
+		ou->life -= dmg;
+		if (ou->life < 0)
+			remove_unit(s, ou, ox, oy);
+	}
+	au->has_atk = 1;
+	if (s->is_spe_mode) {
+		au->spe.amunition -= 1;
+	}
+
+}
+
 void *dungeon_fight_action(int nbArgs, void **args)
 {
 	Entity *df = args[0];
@@ -289,6 +346,75 @@ void *dungeon_fight_action(int nbArgs, void **args)
 	struct df *s = yeGetDataAt(df, "data");
 
 	print_lifes(s);
+
+	if (s->turn_state != 0) {
+		printf("ai turn\n");
+		/* 
+		 * enemy been barbaric, they don't have any notiong of strategic, or group thinking
+		 * they just attack the neerest enemy
+		 */
+		DF_MAP_FOR(x, y) {
+			struct unit *u = s->map[y][x];
+
+			if (!u || !u->life || u->side != s->turn_state || (u->has_move && u->has_atk))
+				continue;
+			struct unit *enemies[4];
+			int nb_enemies;
+			struct unit *ou;
+			struct unit *ne = NULL;
+			int odiff = 100;
+
+			if ((nb_enemies = find_attackable(s, x, y, u->t->range, enemies)) > 0) {
+				ou = enemies[yuiRand() % nb_enemies];
+
+				printf("attack\n");
+				do_attack(s, u, ou);
+				continue;
+			}
+			DF_MAP_FOR(ox, oy) {
+				int diff;
+				ou = s->map[oy][ox];
+
+				if (!ou || ou->side == s->turn_state)
+					continue;
+				diff = abs(x - ox) + abs(x - oy);
+				if (diff < odiff) {
+					ne = ou;
+					odiff = diff;
+				}
+			}
+
+			if (ne) {
+				int other_test = 0;
+
+				printf("%d %d\n", x, y);
+				if (abs(x - ne->x) > abs(y - ne->y)) {
+				test_x:
+					if (ne->x > x && !s->map[y][x + 1]) {
+						move_to(s, u, x + 1, y);
+					} else if (ne->x < x && !s->map[y][x - 1]) {
+						move_to(s, u, x - 1, y);
+					} else if (!other_test) {
+						other_test = 1;
+						goto test_y;
+					}
+				} else {
+				test_y:
+					if (ne->y > y && !s->map[y + 1][x]) {
+						move_to(s, u, x, y + 1);
+					} else if (ne->y < y && !s->map[y - 1][x]) {
+						move_to(s, u, x, y - 1);
+					} else if (!other_test) {
+						other_test = 1;
+						goto test_x;
+					}
+				}
+				continue;
+			}
+		}
+		end_turn(s);
+	}
+
 	if (yevCheckKeys(eves, YKEY_MOUSEDOWN, 1)) {
 		int cx = yeveMouseX() / CASE_W;
 		int cy = yeveMouseY() / CASE_H;
@@ -325,32 +451,9 @@ void *dungeon_fight_action(int nbArgs, void **args)
 				printf("attack\n");
 
 				struct unit *ou = s->map[cy][cx];
-				int dice = s->is_spe_mode == 1 ? su->spe.power : su->t->atk_dice;
-				int roll = yuiRand() % dice + 1;
-				int dmg = roll;
-
-				while (roll == su->t->atk_dice) {
-					printf("critical !\n");
-					dmg += roll;
-					roll = yuiRand() % su->t->atk_dice + 1;
-				}
-				dmg -= ou->t->def;
-				printf("do dmg %d, dice %d\n", dmg, dice);
-				if (dmg > 0) {
-					ou->life -= dmg;
-					if (ou->life < 0)
-						remove_unit(s, ou, cx, cy);
-				}
-				su->has_atk = 1;
-				if (s->is_spe_mode) {
-					su->spe.amunition -= 1;
-				}
+				do_attack(s, su, ou);
 			} else if (action == 0) {
-				s->map[cy][cx] = su;
-				s->map[sy][sx] = NULL;
-				ywCanvasObjSetPos(su->u, cx * CASE_W, cy * CASE_H);
-				printf("move\n");
-				su->has_move = 1;
+				move_to(s, su, cx, cy);
 			} else if (action == 2) {
 				struct unit *ou = s->map[cy][cx];
 
@@ -378,6 +481,8 @@ static  void init_unit(struct unit *u, struct df *df, struct unit_type *t, int x
 	u->t = t;
 	u->life = t->base_life;
 	u->max_life = t->base_life;
+	u->x = x;
+	u->y = y;
 	df->map[y][x] = u;
 	u->side = side;
 	if (t->spe)
@@ -387,8 +492,8 @@ static  void init_unit(struct unit *u, struct df *df, struct unit_type *t, int x
 static void end_turn(struct df *s)
 {
 	unselect(s);
-	++turn_state;
-	turn_state &= 1;
+	++s->turn_state;
+	s->turn_state &= 1;
 	DF_MAP_FOR(x, y) {
 		struct unit *u = s->map[y][x];
 
@@ -464,7 +569,7 @@ void *dungeon_fight_init(int nbArgs, void **args)
 	}
 	init_buttom(df_st, 3, "End\nTurn", end_turn);
 	yeSetFreeAdDestroy(df_data);
-	turn_state = 0;
+	df_st->turn_state = 0;
 	old_tl = ywGetTurnLengthOverwrite();
 	ywSetTurnLengthOverwrite(100000);
 	return ret;
