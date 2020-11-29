@@ -1,0 +1,20 @@
+{
+  "legioness_start": {
+    "pre-battle-txt": [
+      "My name is XXX a Rich Citizen of Utica",
+      "Or at last I use to be that, but 6 month ago",
+      "Romans Take our City, I was then toke as a salve",
+      "by the Principe Romulus Econus",
+      "On a night he decide to plante his dager in me",
+      "I decide his dagger was better in his own belly",
+      "I then take his bellonging, wear itm go out of his tent",
+      "2 Roman was here, luckilly they wasn't gear up"
+    ],
+    "Exclude": ["slinger", "hoplite", "pristeness"],
+    "enemies": [
+      0,0,
+      "spearman", "spearman",
+      0, 0
+    ]
+  }
+}
