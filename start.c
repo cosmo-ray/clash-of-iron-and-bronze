@@ -183,8 +183,13 @@ static void remove_unit(struct df *s, struct unit *u, int x, int y)
 	s->map[y][x] = NULL;
 }
 
-static void print_lifes(struct df *s)
+/**
+ * @return who win, 0 if no winner
+ */
+static int print_lifes(struct df *s)
 {
+	int nb_units[2] = {0};
+
 	/* remove all old lifes */
 	for (int i = 0; s->lifes[i]; ++i) {
 		ywCanvasRemoveObj(s->e, s->lifes[i]);
@@ -202,9 +207,14 @@ static void print_lifes(struct df *s)
 			s->lifes[ll++] =
 				ywCanvasNewRectangle(s->e, ix * CASE_W, iy * CASE_H, cl, 6,
 						     "rgba: 0 255 0 100");
+			nb_units[u->side]++;
 		}
 	}
-
+	if (!nb_units[0])
+		return 2;
+	if (!nb_units[1])
+		return 1;
+	return 0;
 }
 
 static void move_to(struct df *s, struct unit *su, int cx, int cy)
@@ -339,13 +349,26 @@ void do_attack(struct df *s, struct unit *au,
 
 }
 
+#define TRY_ATTACK()							\
+	if ((nb_enemies = find_attackable(s, x, y, u->t->range, enemies)) > 0) { \
+		ou = enemies[yuiRand() % nb_enemies];			\
+		printf("attack\n");					\
+		do_attack(s, u, ou);					\
+		continue;						\
+	}
+	
+
 void *dungeon_fight_action(int nbArgs, void **args)
 {
 	Entity *df = args[0];
 	Entity *eves = args[1];
 	struct df *s = yeGetDataAt(df, "data");
+	int winner;
 
-	print_lifes(s);
+	if ((winner = print_lifes(s)) != 0) {
+		printf("winner %d\n", winner);
+		ygTerminate();
+	}
 
 	if (s->turn_state != 0) {
 		printf("ai turn\n");
@@ -364,13 +387,7 @@ void *dungeon_fight_action(int nbArgs, void **args)
 			struct unit *ne = NULL;
 			int odiff = 100;
 
-			if ((nb_enemies = find_attackable(s, x, y, u->t->range, enemies)) > 0) {
-				ou = enemies[yuiRand() % nb_enemies];
-
-				printf("attack\n");
-				do_attack(s, u, ou);
-				continue;
-			}
+			TRY_ATTACK()
 			DF_MAP_FOR(ox, oy) {
 				int diff;
 				ou = s->map[oy][ox];
@@ -387,7 +404,6 @@ void *dungeon_fight_action(int nbArgs, void **args)
 			if (ne) {
 				int other_test = 0;
 
-				printf("%d %d\n", x, y);
 				if (abs(x - ne->x) > abs(y - ne->y)) {
 				test_x:
 					if (ne->x > x && !s->map[y][x + 1]) {
@@ -409,8 +425,8 @@ void *dungeon_fight_action(int nbArgs, void **args)
 						goto test_x;
 					}
 				}
-				continue;
 			}
+			TRY_ATTACK()
 		}
 		end_turn(s);
 	}
