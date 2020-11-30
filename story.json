@@ -1,24 +1,28 @@
 {
-  "legioness_start": {
-    "pre-battle-txt": [
-      "My name is Yzebel a Rich Citizen of Utica",
-      "Or at last I use to be that, but 6 month ago",
-      "Romans Take our City, I was then toke as a salve",
-      "by the Principe Romulus Econus",
-      "On a night we was stationed at near the beach",
-      "Romulus was guarding the boats",
-      "After his watch, like every night",
-      "decide to plante his dager in me",
-      "But thisnight, I decide his dagger was better plant in his own belly",
-      "I then take his bellonging, wear itm go out of his tent",
-      "2 Roman was here, and not very happy to see Romulus Body fluid on me",
-      "Red Body FLuide "
-    ],
-    "Exclude": ["slinger", "hoplite", "pristeness"],
-    "enemies": [
-      0, "spearman",
-      0, 0,
-      0, "spearman"
-    ]
-  }
+    "legioness_start": {
+	"pre-battle-txt": [
+	    "My name is Yzebel a Rich Citizen", "of Utica",
+	    "Or at last It use to be that,", "6 month ago",
+	    "Romans Sack Utica, toke me as salve",
+	    "I was now Principe Romulus Econus", "Property",
+	    "On a night", "we was stationed near a beach",
+	    "Romulus was guarding the boats",
+	    "After his watch, like every night",
+	    "He decide to plante his dager in me",
+	    "But this night, I decide his dagger", "was better plant in his own belly",
+	    "I then take his bellonging,", "wear it, go out of his tent",
+	    "2 Roman was there", "they where unhappy to see Romulus",
+	    "Red Body fluid on me",
+	    "But it was just the appertiser"
+	],
+	"exclude": ["slinger", "hoplite", "sear"],
+	"enemies": [
+	    0, "spearman",
+	    0, 0,
+	    0, 0,
+	    0, 0,
+	    0, 0,
+	    0, "spearman"
+	]
+    }
 }

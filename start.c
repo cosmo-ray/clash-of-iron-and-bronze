@@ -1,4 +1,3 @@
-
 /**        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  *                   Version 2, December 2004
  *
@@ -99,6 +98,19 @@ static struct unit_type legioness = {
 	12, 1, 6, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 8, "pilum"}
 };
 
+static struct unit_type *str_unit_type(const char *s)
+{
+	if (!strcmp(s, "mycenaean_revenant"))
+		return &mycenaean_revenant;
+	if (!strcmp(s, "axeman"))
+		return &axeman;
+	if (!strcmp(s, "spearman"))
+		return &spearman;
+	if (!strcmp(s, "spearman_trower"))
+		return &spearman_trower;
+	return NULL;
+}
+
 struct unit {
 	struct unit_type *t;
 	int life;
@@ -127,7 +139,7 @@ struct button {
 
 struct df {
 	struct unit p0[4];
-	struct unit p1[8];
+	struct unit p1[12];
 	struct unit *map[6][4];
 	Entity *other_square[6][4];
 	Entity *e;
@@ -560,20 +572,39 @@ void *dungeon_fight_init(int nbArgs, void **args)
 	struct df *df_st = calloc(1, sizeof *df_st);
 	Entity *df_data = yeCreateData(df_st, df, "data");
 	yeAutoFree Entity *bg_size = ywSizeCreate(4 * CASE_W, 6 * CASE_H, NULL, NULL);
+	Entity *excludes = yeGet(df, "exclude");
+	int excluded = 0;
+	Entity *enemies = yeGet(df, "enemies");
+
 
 	df_st->e = df;
 
 	ywCanvasForceSizeXY(ywCanvasNewImgByPath(df, 0, 0, "./road.png"), 4 * CASE_W, 6 * CASE_H);
 
-	init_unit(&df_st->p0[0], df_st, &hoplite, 1, 2, GOOD_SIDE);
-	init_unit(&df_st->p0[1], df_st, &slinger, 0, 2, GOOD_SIDE);
-	init_unit(&df_st->p0[2], df_st, &pritestess, 0, 3, GOOD_SIDE);
-	init_unit(&df_st->p0[3], df_st, &legioness, 1, 3, GOOD_SIDE);
+	YE_FOREACH(excludes, e) {
+		excluded |= (1 * !strcmp(yeGetString(e), "slinger")) << 0;
+		excluded |= (1 * !strcmp(yeGetString(e), "hoplite")) << 1;
+		excluded |= (1 * !strcmp(yeGetString(e), "sear")) << 2;
+		excluded |= (1 * !strcmp(yeGetString(e), "legioness")) << 3;
+	}
 
-	init_unit(&df_st->p1[0], df_st, &axeman, 2, 2, BAD_SIDE);
-	init_unit(&df_st->p1[1], df_st, &spearman, 2, 3, BAD_SIDE);
-	init_unit(&df_st->p1[2], df_st, &spearman_trower, 3, 2, BAD_SIDE);
-	init_unit(&df_st->p1[3], df_st, &mycenaean_revenant, 3, 5, BAD_SIDE);
+	if (!(excluded & 1 << 1))
+		init_unit(&df_st->p0[0], df_st, &hoplite, 1, 2, GOOD_SIDE);
+	if (!(excluded & 1))
+		init_unit(&df_st->p0[1], df_st, &slinger, 0, 2, GOOD_SIDE);
+	if (!(excluded & 1 << 2))
+		init_unit(&df_st->p0[2], df_st, &pritestess, 0, 3, GOOD_SIDE);
+	if (!(excluded & 1 << 3))
+		init_unit(&df_st->p0[3], df_st, &legioness, 1, 3, GOOD_SIDE);
+
+	for (int i = 0, j = 0; i < 12; ++i) {
+		const char *enemy = yeGetStringAt(enemies, i);
+		if (!enemy)
+			continue;
+		printf("%d %s: %d %d\n", i, enemy, 2 + (i & 1), i / 2);
+		init_unit(&df_st->p1[j++], df_st, str_unit_type(enemy),
+			  2 + (i & 1), i / 2, BAD_SIDE);
+	}
 
         /* make grid */
 	for (int i = 0; i < 5; ++i)
@@ -591,23 +622,34 @@ void *dungeon_fight_init(int nbArgs, void **args)
 	return ret;
 }
 
+#include "story.c"
+
 void *mod_init(int nbArg, void **args)
 {
   	Entity *mod = args[0];
 	Entity *init;
+	Entity *init2;
 
 	init = yeCreateArray(NULL, NULL);
 	YEntityBlock {
 		init.name = "dungeon-fight";
 		init.callback = dungeon_fight_init;
-		mod.name = "dungeon-fight";
-		mod.test_dungeon_fight = [];
-		mod.test_dungeon_fight["<type>"] = "dungeon-fight";
-		mod.starting_widget = "test_dungeon_fight";
-		mod["window size"] = [400, 650];
-		mod["window name"] = "test_dungeon_fight";
 	}
-
 	ywidAddSubType(init);
+
+	init2 = yeCreateArray(NULL, NULL);
+	YEntityBlock {
+		init2.name = "dungeon-story";
+		init2.callback = dungeon_story_init;
+		mod.name = "dungeon-fight";
+		mod.test_dungeon_story = [];
+		mod.test_dungeon_story["<type>"] = "dungeon-story";
+		mod.test_dungeon_story.file = "story.json";
+		mod.starting_widget = "test_dungeon_story";
+		mod["window size"] = [400, 650];
+		mod["window name"] = "test_dungeon_story";
+	}
+	ywidAddSubType(init2);
+
 	return mod;
 }
