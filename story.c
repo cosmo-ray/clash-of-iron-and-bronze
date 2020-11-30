@@ -32,6 +32,11 @@ void *dungeon_story_init(int nbArgs, void **args)
 	yeGetPush2(cur_s, "pre-battle-txt", e, "text");
 	yeGetPush(cur_s, next, "exclude");
 	yeGetPush(cur_s, next, "enemies");
+	yeCreateString("nextOnKeyDown", next, "win-action");
+
+	Entity *last = yeCreateArray(next, "next");
+	yeCreateString("text-screen", last, "<type>");
+	yeGetPush2(cur_s, "win-txt", last, "text");
 	
 	void *ret = ywidNewWidget(e, "text-screen");
 	printf("%s\n", yeToCStr(e, -1, YE_FORMAT_PRETTY));

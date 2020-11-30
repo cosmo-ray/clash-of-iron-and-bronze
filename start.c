@@ -413,6 +413,8 @@ void *dungeon_fight_action(int nbArgs, void **args)
 				}
 			}
 
+			if (u->has_move)
+				continue;
 			if (ne) {
 				int other_test = 0;
 
