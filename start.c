@@ -404,12 +404,13 @@ void *dungeon_fight_action(int nbArgs, void **args)
 	if ((winner = print_lifes(s)) != 0) {
 		if (yeGet(df, "win-action")) {
 			printf("win %p\n", yeGet(df, "win-action"));
+			printf("%s\n", yeToCStr(yeGet(df, "win-action"), -1, YE_FORMAT_PRETTY));
 			yesCall(yeGet(df, "win-action"), df);
 		} else {
 			printf("winner %d\n", winner);
 			ygTerminate();
 		}
-		return NOTHANDLE;
+		return (void *)ACTION;
 	}
 
 	if (s->turn_state != 0) {
