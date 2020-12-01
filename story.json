@@ -25,12 +25,11 @@
 	    0, "spearman"
 	],
 	"win-txt": [
-	    "One guy was now lying dead", "the other one on his knee",
-	    "'Please don't kill me !'", "Despite my burning heated",
+	    "One guy was now lying dead", "the other on his knees",
+	    "'Please don't kill me !'", "Despite my burning hatred",
 	    "I decide to grant his wish", "Then cut his arm and tell",
-	    "'fine I won't take your life'", "'Hvae fun bleeding to dead'",
-	    "You leave and try to find",
-	    "an escape out of the camp"
+	    "'fine I won't take your life'", "'Have fun bleeding to dead'",
+	    "You leave and try to find", "an escape out of the camp"
 	],
 	"lvl-up": ["legioness"]
     }
