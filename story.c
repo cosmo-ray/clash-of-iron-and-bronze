@@ -27,7 +27,7 @@ void *dungeon_story_init(int nbArgs, void **args)
 		e.story_idx = 0;
 		lvls.slinger = 0;
 		lvls.hoplite = 0;
-		lvls.sear = 0;
+		lvls.seer = 0;
 		lvls.legioness = 0;
 	}
 

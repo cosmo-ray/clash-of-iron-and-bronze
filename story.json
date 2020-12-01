@@ -16,7 +16,7 @@
 	    "Red Body fluid on me",
 	    "But it was just the appertiser"
 	],
-	"exclude": ["slinger", "hoplite", "sear"],
+	"exclude": ["slinger", "hoplite", "seer"],
 	"enemies": [
 	    0, "spearman",
 	    0, 0,
@@ -51,7 +51,7 @@
 	    "spearman", 0,
 	    0, "spearman_trower"
 	],	
-	"exclude": ["sear"],
+	"exclude": ["seer"],
 	"win-txt": [
 	    "after defeating the romans",
 	    "We look for survivors",
@@ -90,12 +90,178 @@
 	    "axeman", 0,
 	    0, "spearman_trower"
 	],	
-	"exclude": ["sear"],
+	"exclude": ["seer"],
 	"win-txt": [
 	    "The equipage was now following me",
-	    "And good news this little talk",
+	    "And other good news",
+	    "this little talk",
 	    "give them motivations",
 	    "to paddle faster"
+	]
+    },
+    "Lysandra": {
+    	"pre-battle-txt": [
+	    "Meanwhile in Greece:",
+	    "Lysandra Seer of Corinth",
+	    "Was doing unfaithful things",
+	    "With Xenia, wife of Photine",
+	    "A powerful Macedionian General",
+	    "-Ahhh, That was nice", " We should do that more",
+	    " You don't seems happy are you sad",
+	    "-That's okay, I guess, I'm having",
+	    " strange dream recently",
+	    "Sudenly someone interupt them",
+	    "-WHAT, who is this whore in your bed",
+	    "She a seer, I ask her for advices",
+	    "Photine, take his spear:",
+	    "Don't bullshit me",
+	    "that was your last mistake"
+	],
+	"enemies": [
+	    0, 0,
+	    0, 0,
+	    "spearman", 0
+	],
+	"exclude": ["slinger", "hoplite", "legioness"],
+	"win-txt": [
+	    "Photine was defeat,",
+	    "your knife in his throat",
+	    "Undertanding he was going to die",
+	    "But decided to make his last",
+	    "Moment meaningful",
+	    "He trow his weapon on his wife",
+	    "Stil in bed and afraid",
+	    "She didn't saw that comming",
+	    "She die",
+	    "Lysandra was now alone",
+	    "she knew her dream was true",
+	    "she had to go to that Argolid beach"
+	]
+    },
+    "agolian road": {
+	"pre-battle-txt": [
+	    "Lysandra was on the Road",
+	    "Following her instinct",
+	    "But on the road",
+	    "She mean unfriendly foo",
+	    "We know you kill Photine",
+	    "Ther's a bounty on your head"
+	],
+	"enemies": [
+	    0, "spearman",
+	    0,0,
+	    0,0,
+	    0,0,
+	    0,0,
+	    0, "spearman",
+	],
+	"exclude": ["slinger", "hoplite", "legioness"],
+	"win-txt": [
+	    "She knew she was researched",
+	    "and she had to run",
+	    "With her dream and her instic",
+	    "As her only guide"
+	]
+    },
+    "agolian beach": {
+	"pre-battle-txt": [
+	    "Yzebel and her team arrive in Agolia",
+	    "On the distance they saw a woman",
+	    "Been pursached by men-at-arms",
+	    "Alone fighting a lot of guys",
+	    "- Chief look at this", " can we loot the guys",
+	    " and take the girl ?",
+	    "Yzebel was on the point to approve",
+	    "The request, but suddenly",
+	    "She got an intuition",
+	    "You can loot the guy",
+	    "But we must protect that girl"
+	],
+	"enemies": [
+	    "spearman", "spearman_trower",
+	    "axeman", 0,
+	    "axeman", "spearman_trower",
+	    "axeman", "spearman_trower",
+	    "axeman", 0,
+	    "spearman", "spearman_trower"
+	],
+	"win-txt": [
+	    "Yzebel look at Lysandra",
+	    "Like guided by a force",
+	    "she could not understand",
+	    "She approach her",
+	    "Then kiss her",
+	    "when she does",
+	    "A strange thing happen",
+	    "Like they where discution",
+	    "Telling the other one everything",
+	    "About they life,",
+	    "they vision and dream",
+	    "Then Lysandra say:",
+	    "We must cross the see",
+	    "Yzebel answer:",
+	    "We must go to Troy"
+	]
+    },
+    "unexected Enemy": {
+	"pre-battle-txt": [
+	    "The 2 guy look at themself",
+	    "Like What the Fuck",
+	    "By the way they name are",
+	    "They are...", "Hummm",
+	    "I don't kniw...",
+	    "Let's call them",
+	    "Grom and Zogzog",
+	    "So they was WTFing together",
+	    "Sudenly zogzog was scared",
+	    "What is this Monster !"
+	],
+	"enemies": [
+	    0, 0,
+	    "mycenaean_revenant", 0,
+	    0, 0
+	],
+	"win-txt": ["Once the monster was dead",
+		    "They get back to sea",
+		    "Direction, the ruine of troy"]
+    },
+    "The End": {
+	"pre-battle-txt": [
+	    "They arrive at they destination",
+	    "An anbiance of dead was here",
+	    "Then a woman look at our band:",
+	    "I have been guarding thoses",
+	    "Runes ruines for more than",
+	    "800 years, I am old now",
+	    "I want to rest, and you 2",
+	    "Must inheric my power",
+	    "I was waiting for you",
+	    "But I have a final test",
+	    "Beat them, and you'll",
+	    "be able the control",
+	    "The undead mightierst",
+	    "Army ever made"
+	],
+	"enemies": [
+	    0, "mycenaean_revenant",
+	    0, "mycenaean_revenant",
+	    0, "mycenaean_revenant",
+	    0, "mycenaean_revenant"
+	],
+	"win-txt": [
+	    "The deal was done",
+	    "Lysandra and Yzebel was now",
+	    "The 2 most powerful been",
+	    "in this world",
+	    "Lysandra use her power",
+	    "for herself, she travel all",
+	    "Around the world", "Yzebel",
+	    "She used to have dream",
+	    "But now she had only one",
+	    "Thing on her mind",
+	    "And she know how to use her",
+	    "power:",
+	    "Rome delenda est"
 	]
     }
 }

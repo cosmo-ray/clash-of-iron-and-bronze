@@ -103,7 +103,7 @@ static struct unit_type pritestess  = {
 };
 
 static struct unit_type legioness = {
-	12, 1, 6, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 8, "pilum"},
+	12, 1, 7, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 9, "pilum"},
 	&(struct lvl_bonus){2, 1, 1}
 };
 
@@ -123,7 +123,7 @@ static struct unit_type *str_unit_type(const char *s)
 static const char *unit_type_str(struct unit_type *t)
 {
 	if (t == &pritestess)
-		return "sear";
+		return "seer";
 	else if (t == &legioness)
 		return "legioness";
 	else if (t == &hoplite)
@@ -402,7 +402,7 @@ void *dungeon_fight_action(int nbArgs, void **args)
 	int winner;
 
 	if ((winner = print_lifes(s)) != 0) {
-		if (yeGet(df, "win-action")) {
+		if (winner == 1 && yeGet(df, "win-action")) {
 			printf("win %p\n", yeGet(df, "win-action"));
 			printf("%s\n", yeToCStr(yeGet(df, "win-action"), -1, YE_FORMAT_PRETTY));
 			yesCall(yeGet(df, "win-action"), df);
@@ -554,7 +554,7 @@ static  void init_unit(struct unit *u, struct df *df, struct unit_type *t, int x
 		u->max_life += lvl * t->lvl_bonus->hp;
 		u->atk_bonus += lvl * t->lvl_bonus->atk_bonus / t->lvl_bonus->atk_bonus_freq;
 	}
-	printf("init %s at %d %d, lvl %d", unit_type_str(t), u->max_life, u->atk_bonus, lvl);
+	printf("init %s at %d %d, lvl %d\n", unit_type_str(t), u->max_life, u->atk_bonus, lvl);
 	u->life = u->max_life;
 }
 
@@ -624,7 +624,7 @@ void *dungeon_fight_init(int nbArgs, void **args)
 	YE_FOREACH(excludes, e) {
 		excluded |= (1 * !strcmp(yeGetString(e), "slinger")) << 0;
 		excluded |= (1 * !strcmp(yeGetString(e), "hoplite")) << 1;
-		excluded |= (1 * !strcmp(yeGetString(e), "sear")) << 2;
+		excluded |= (1 * !strcmp(yeGetString(e), "seer")) << 2;
 		excluded |= (1 * !strcmp(yeGetString(e), "legioness")) << 3;
 	}
 
