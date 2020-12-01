@@ -54,6 +54,12 @@ struct special {
 	const char *name;
 };
 
+struct lvl_bonus {
+	int hp;
+	int atk_bonus;
+	int atk_bonus_freq;
+};
+
 struct unit_type {
 	int base_life;
 	int range;
@@ -62,40 +68,43 @@ struct unit_type {
 	int side;
 	const char *path;
 	struct special *spe;
+	struct lvl_bonus *lvl_bonus;
 };
 
 static int old_tl;
 
 static struct unit_type mycenaean_revenant = {
-	50, 1, 20, 4, BAD_SIDE, MYCENAEAN_REVENANT_PATH, NULL
+	50, 1, 20, 4, BAD_SIDE, MYCENAEAN_REVENANT_PATH, NULL, NULL
 };
 
 static struct unit_type axeman = {
-	13, 1, 10, 0, BAD_SIDE, AXEMAN_PATH, NULL
+	13, 1, 10, 0, BAD_SIDE, AXEMAN_PATH, NULL, NULL
 };
 
 static struct unit_type spearman = {
-	10, 1, 5, 0, BAD_SIDE, SPEARMAN_PATH, NULL
+	10, 1, 5, 0, BAD_SIDE, SPEARMAN_PATH, NULL, NULL
 };
 
 static struct unit_type spearman_trower = {
-	10, 2, 5, 0, BAD_SIDE, SPEARMAN_TROWER_PATH, NULL
+	10, 2, 5, 0, BAD_SIDE, SPEARMAN_TROWER_PATH, NULL, NULL
 };
 
 static struct unit_type slinger = {
-	10, 5, 4, 1, GOOD_SIDE, slinger_path, NULL
+	10, 5, 4, 1, GOOD_SIDE, slinger_path, NULL, &(struct lvl_bonus){1, 1, 1}
 };
 
 static struct unit_type hoplite = {
-	15, 1, 10, 3, GOOD_SIDE, hoplite_path, NULL
+	15, 1, 10, 3, GOOD_SIDE, hoplite_path, NULL, &(struct lvl_bonus){3, 1, 1}
 };
 
 static struct unit_type pritestess  = {
-	10, 1, 4, 0, GOOD_SIDE, pritestess_path, &(struct special){2, SPE_HEAL, 4, 3, "heal"}
+	10, 1, 4, 0, GOOD_SIDE, pritestess_path, &(struct special){2, SPE_HEAL, 4, 3, "heal"},
+	&(struct lvl_bonus){1, 1, 2}
 };
 
 static struct unit_type legioness = {
-	12, 1, 6, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 8, "pilum"}
+	12, 1, 6, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 8, "pilum"},
+	&(struct lvl_bonus){2, 1, 1}
 };
 
 static struct unit_type *str_unit_type(const char *s)
@@ -111,10 +120,24 @@ static struct unit_type *str_unit_type(const char *s)
 	return NULL;
 }
 
+static const char *unit_type_str(struct unit_type *t)
+{
+	if (t == &pritestess)
+		return "sear";
+	else if (t == &legioness)
+		return "legioness";
+	else if (t == &hoplite)
+		return "hoplite";
+	else if (t == &slinger)
+		return "slinger";
+	return NULL;
+}
+
 struct unit {
 	struct unit_type *t;
 	int life;
 	int max_life;
+	int atk_bonus;
 	int x;
 	int y;
 	int side;
@@ -348,6 +371,7 @@ void do_attack(struct df *s, struct unit *au,
 		roll = yuiRand() % au->t->atk_dice + 1;
 	}
 	dmg -= ou->t->def;
+	dmg += au->atk_bonus;
 	printf("do dmg %d, dice %d\n", dmg, dice);
 	if (dmg > 0) {
 		ou->life -= dmg;
@@ -378,8 +402,14 @@ void *dungeon_fight_action(int nbArgs, void **args)
 	int winner;
 
 	if ((winner = print_lifes(s)) != 0) {
-		printf("winner %d\n", winner);
-		ygTerminate();
+		if (yeGet(df, "win-action")) {
+			printf("win %p\n", yeGet(df, "win-action"));
+			yesCall(yeGet(df, "win-action"), df);
+		} else {
+			printf("winner %d\n", winner);
+			ygTerminate();
+		}
+		return NOTHANDLE;
 	}
 
 	if (s->turn_state != 0) {
@@ -488,7 +518,7 @@ void *dungeon_fight_action(int nbArgs, void **args)
 				struct unit *ou = s->map[cy][cx];
 
 				if (ou && ou->life < ou->max_life) {
-					ou->life += yuiRand() % su->spe.power + 1;
+					ou->life += yuiRand() % su->spe.power + 1 + su->atk_bonus;
 					su->spe.amunition -= 1;
 					if (ou->life > ou->max_life)
 						ou->life = ou->max_life;
@@ -506,17 +536,25 @@ void *dungeon_fight_action(int nbArgs, void **args)
 
 static  void init_unit(struct unit *u, struct df *df, struct unit_type *t, int x, int y, int side)
 {
+	int lvl = yeGetIntAt(yeGet(df->e, "lvls"), unit_type_str(t));
+
 	u->u = ywCanvasNewImgByPath(df->e, x * CASE_W, y * CASE_H, t->path);
 	ywCanvasForceSizeXY(u->u, CASE_W, CASE_H);
 	u->t = t;
-	u->life = t->base_life;
 	u->max_life = t->base_life;
 	u->x = x;
 	u->y = y;
+	u->atk_bonus = 0;
 	df->map[y][x] = u;
 	u->side = side;
 	if (t->spe)
 		u->spe = *t->spe;
+	if (lvl) {
+		u->max_life += lvl * t->lvl_bonus->hp;
+		u->atk_bonus += lvl * t->lvl_bonus->atk_bonus / t->lvl_bonus->atk_bonus_freq;
+	}
+	printf("init %s at %d %d, lvl %d", unit_type_str(t), u->max_life, u->atk_bonus, lvl);
+	u->life = u->max_life;
 }
 
 static void end_turn(struct df *s)
@@ -577,7 +615,6 @@ void *dungeon_fight_init(int nbArgs, void **args)
 	Entity *excludes = yeGet(df, "exclude");
 	int excluded = 0;
 	Entity *enemies = yeGet(df, "enemies");
-
 
 	df_st->e = df;
 

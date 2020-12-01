@@ -19,12 +19,17 @@ void *dungeon_story_init(int nbArgs, void **args)
 	printf("dungeon_story_init %s\n", yeGetStringAt(e, "file"));
 	yeAutoFree Entity *fe =  ygFileToEnt(YJSON, yeGetStringAt(e, "file"), NULL);
 	Entity *next = yeCreateArray(e, "next");
+	yeAutoFree Entity *lvls = yeCreateArray(NULL, NULL);
 
 	YEntityBlock {
 		e.background = "rgba: 255 255 255 255";
 		e.action = "nextOnKeyDown";
 		e.story = fe;
 		e.story_idx = 0;
+		lvls.slinger = 0;
+		lvls.hoplite = 0;
+		lvls.sear = 0;
+		lvls.legioness = 5;
 		next["<type>"] = "dungeon-fight";
 	}
 
@@ -32,7 +37,8 @@ void *dungeon_story_init(int nbArgs, void **args)
 	yeGetPush2(cur_s, "pre-battle-txt", e, "text");
 	yeGetPush(cur_s, next, "exclude");
 	yeGetPush(cur_s, next, "enemies");
-	yeCreateString("nextOnKeyDown", next, "win-action");
+	yeCreateString(ygGet("callNext"), next, "win-action");
+	yeCreateCopy(lvls, next, "lvls");
 
 	Entity *last = yeCreateArray(next, "next");
 	yeCreateString("text-screen", last, "<type>");
