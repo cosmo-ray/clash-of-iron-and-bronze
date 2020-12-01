@@ -9,7 +9,8 @@
 	    "Romulus was guarding the boats",
 	    "After his watch, like every night",
 	    "He decide to plante his dager in me",
-	    "But this night, I decide his dagger", "was better plant in his own belly",
+	    "But this night, Tired of been humiliated",
+	    "I decide his dagger", "was better plant in his own belly",
 	    "I then take his bellonging,", "wear it, go out of his tent",
 	    "2 Roman was there", "they where unhappy to see Romulus",
 	    "Red Body fluid on me",
@@ -29,8 +30,72 @@
 	    "'Please don't kill me !'", "Despite my burning hatred",
 	    "I decide to grant his wish", "Then cut his arm and tell",
 	    "'fine I won't take your life'", "'Have fun bleeding to dead'",
-	    "You leave and try to find", "an escape out of the camp"
+	    "I leave and try to find", "an escape out of the camp"
 	],
-	"lvl-up": ["legioness"]
+    },
+    "escape": {
+	"pre-battle-txt": [
+	    "I was now hiding from Romans Pigs",
+	    "Then I got lucky:",
+	    "I find the slave pen, open it",
+	    "Slaves take weapons",
+	    "It was caos, sudenly:",
+	    "4 guy jump on me", "but 2 guys I had just freed",
+	    "join the fight on my side"
+	],
+	"enemies": [
+	    0, "spearman_trower",
+	    "spearman", 0,
+	    "spearman", 0,
+	    "spearman", 0,
+	    "spearman", 0,
+	    0, "spearman_trower"
+	],	
+	"exclude": ["sear"],
+	"win-txt": [
+	    "after defeating the romans",
+	    "We look for survivors",
+	    "Roman Soldiers:",
+	    "I give them slow death",
+	    "Auxilier Soldiers:",
+	    "I give them slow death",
+	    "Non slave Men:",
+	    "I give them slow death",
+	    "Free women:",
+	    "I give them slow death",
+	    "That's what you get for helping scum",
+	    "We reunite suviving slaves",
+	    "We toke a boat, and leave"
+	]
+    },
+    "to greece": {
+    	"pre-battle-txt": [
+	    "We was now out sea, far from Affrica",
+	    "And far from Rome", "But where to go ?",
+	    "I close my eyes", "I had a Dream, a Visions",
+	    "A shooting star was comming",
+	    "from the moon, and crash to Greece",
+	    "Ionian Greece to be precise",
+	    "Then the moon talk to me",
+	    "Got to the Argolid",
+	    "You'll meet your destiny",
+	    "Sadly some guys refuse to follow me",
+	    "I start the negociation"
+	],
+	"enemies": [
+	    0, "spearman_trower",
+	    "axeman", 0,
+	    "axeman", 0,
+	    "axeman", 0,
+	    "axeman", 0,
+	    0, "spearman_trower"
+	],	
+	"exclude": ["sear"],
+	"win-txt": [
+	    "The equipage was now following me",
+	    "And good news this little talk",
+	    "give them motivations",
+	    "to paddle faster"
+	]
     }
 }
