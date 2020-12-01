@@ -90,21 +90,21 @@ static struct unit_type spearman_trower = {
 };
 
 static struct unit_type slinger = {
-	10, 5, 4, 1, GOOD_SIDE, slinger_path, NULL, &(struct lvl_bonus){1, 1, 1}
+	10, 5, 4, 1, GOOD_SIDE, slinger_path, NULL, &(struct lvl_bonus){2, 1, 1}
 };
 
 static struct unit_type hoplite = {
-	15, 1, 10, 3, GOOD_SIDE, hoplite_path, NULL, &(struct lvl_bonus){3, 1, 1}
+	15, 1, 10, 3, GOOD_SIDE, hoplite_path, NULL, &(struct lvl_bonus){3, 2, 1}
 };
 
 static struct unit_type pritestess  = {
 	10, 1, 4, 0, GOOD_SIDE, pritestess_path, &(struct special){2, SPE_HEAL, 4, 3, "heal"},
-	&(struct lvl_bonus){1, 1, 2}
+	&(struct lvl_bonus){2, 1, 1}
 };
 
 static struct unit_type legioness = {
 	12, 1, 7, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 9, "pilum"},
-	&(struct lvl_bonus){2, 1, 1}
+	&(struct lvl_bonus){3, 1, 1}
 };
 
 static struct unit_type *str_unit_type(const char *s)

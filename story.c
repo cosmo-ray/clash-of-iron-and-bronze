@@ -25,10 +25,10 @@ void *dungeon_story_init(int nbArgs, void **args)
 		e.action = "nextOnKeyDown";
 		e.story = fe;
 		e.story_idx = 0;
-		lvls.slinger = 0;
-		lvls.hoplite = 0;
-		lvls.seer = 0;
-		lvls.legioness = 0;
+		lvls.slinger = 2;
+		lvls.hoplite = 2;
+		lvls.seer = 2;
+		lvls.legioness = 2;
 	}
 
 	Entity *cur_s;
