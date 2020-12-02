@@ -167,6 +167,7 @@ struct df {
 	Entity *other_square[6][4];
 	Entity *e;
 	Entity *select_square;
+	Entity *mouse_over;
 	Entity *lifes[6 * 4];
 	int selected_x;
 	int selected_y;
@@ -476,19 +477,27 @@ void *dungeon_fight_action(int nbArgs, void **args)
 		end_turn(s);
 	}
 
+	int cx = yeveMouseX() / CASE_W;
+	int cy = yeveMouseY() / CASE_H;
+
+	if (cx >= 4)
+		return NULL;
+
+	ywCanvasRemoveObj(s->e, s->mouse_over);
+	s->mouse_over = NULL;
+
 	if (yevCheckKeys(eves, YKEY_MOUSEDOWN, 1)) {
-		int cx = yeveMouseX() / CASE_W;
-		int cy = yeveMouseY() / CASE_H;
 
 		// buttom
 		if (cy == 6) {
 			if (s->bottom_buttom[cx].state == BUTTON_UNPUSH) {
 				s->bottom_buttom[cx].callback_push(s);
+				s->mouse_over = mk_case_rect(s->e, cx, 6, "rgba: 120 120 120 100", NULL);
 			}
 			return NULL;
 		}
 
-		if (cx >= 4 || cy >= 6)
+		if (cy >= 6)
 			return NULL;
 		
 		if (!s->select_square && can_select_unit(s, cx, cy)) {
