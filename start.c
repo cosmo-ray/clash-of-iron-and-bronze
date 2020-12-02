@@ -56,6 +56,7 @@ struct special {
 	int amunition;
 	int power;
 	const char *name;
+	void (*callback)(struct df *s, struct unit *u);
 };
 
 struct lvl_bonus {
@@ -102,14 +103,18 @@ static struct unit_type hoplite = {
 };
 
 static struct unit_type pritestess  = {
-	10, 1, 4, 0, GOOD_SIDE, pritestess_path, &(struct special){2, SPE_HEAL, 4, 3, "heal"},
+	10, 1, 4, 0, GOOD_SIDE, pritestess_path,
+	&(struct special){2, SPE_HEAL, 4, 3, "heal", NULL},
 	&(struct lvl_bonus){2, 1, 1}
 };
 
+static void legioness_rm_pilum(struct df *, struct unit *);
 static struct unit_type legioness = {
-	12, 1, 7, 3, GOOD_SIDE, legioness_path, &(struct special){2, SPE_ATTACK, 1, 9, "pilum"},
+	12, 1, 7, 3, GOOD_SIDE, legioness_path,
+	&(struct special){2, SPE_ATTACK, 1, 9, "pilum", legioness_rm_pilum},
 	&(struct lvl_bonus){3, 1, 1}
 };
+
 
 static struct unit_type *str_unit_type(const char *s)
 {
@@ -229,6 +234,14 @@ static void remove_unit(struct df *s, struct unit *u, int x, int y)
 	s->map[y][x] = NULL;
 }
 
+static void legioness_rm_pilum(struct df *s, struct unit *u)
+{
+	ywCanvasRemoveObj(s->e, u->u);
+	u->u = ywCanvasNewImgByPath(s->e, u->x * CASE_W, u->y * CASE_H,
+				    legioness_pilumless_path);
+	ywCanvasForceSizeXY(u->u, CASE_W, CASE_H);
+}
+
 /**
  * @return who win, 0 if no winner
  */
@@ -267,7 +280,6 @@ static void move_to(struct df *s, struct unit *su, int cx, int cy)
 {
 	int sx = su->x, sy = su->y;
 
-	printf("move %d %d -> %d %d\n", sx, sy, cx, cy);
 	s->map[cy][cx] = su;
 	s->map[sy][sx] = NULL;
 	ywCanvasObjSetPos(su->u, cx * CASE_W, cy * CASE_H);
@@ -397,17 +409,17 @@ void do_attack(struct df *s, struct unit *au,
  		ywCanvasMoveObjXY(slash, -20, -20);
 		wait_update(100000);
 		ywCanvasRemoveObj(s->e, slash);
-		printf("atk\n");
 	} else {
 		Entity *shield = ywCanvasNewImgByPath(s->e, ox * CASE_W, oy * CASE_H, shield_path);
 
-		printf("shield\n");
 		wait_update(300000);
 		ywCanvasRemoveObj(s->e, shield);
 	}
 	au->has_atk = 1;
 	if (s->is_spe_mode) {
 		au->spe.amunition -= 1;
+		if (au->spe.callback)
+			au->spe.callback(s, au);
 	}
 
 }
@@ -558,6 +570,8 @@ void *dungeon_fight_action(int nbArgs, void **args)
 					su->spe.amunition -= 1;
 					if (ou->life > ou->max_life)
 						ou->life = ou->max_life;
+					if (su->spe.callback)
+						su->spe.callback(s, su);
 				}
 			}
 			unselect(s);
