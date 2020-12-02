@@ -23,6 +23,10 @@
 #define hoplite_path "./hoplite.png"
 #define pritestess_path "./pritestess.png"
 #define legioness_path "./legioness.png"
+#define legioness_pilumless_path "./legioness_pilumless.png"
+
+#define slash_path "./slash.png"
+#define shield_path "./shild.png"
 
 #define MYCENAEAN_REVENANT_PATH "./mycenaean_revenant.png"
 #define AXEMAN_PATH "./axeman.png"
@@ -184,6 +188,12 @@ static void handle_special(struct df *);
 static void rm_button(struct df *, int);
 static void init_buttom(struct df *, int , const char *str, void (*)(struct df *));
 static void end_turn(struct df *s);
+
+static void wait_update(int us)
+{
+	usleep(us);
+	ygUpdateScreen();
+}
 
 static void fill_square(struct df *, int, const char *,
 			_Bool (*)(struct df *, struct unit *, struct unit *), int);
@@ -375,9 +385,25 @@ void do_attack(struct df *s, struct unit *au,
 	dmg += au->atk_bonus;
 	printf("do dmg %d, dice %d\n", dmg, dice);
 	if (dmg > 0) {
+		Entity *slash;
+
 		ou->life -= dmg;
 		if (ou->life < 0)
 			remove_unit(s, ou, ox, oy);
+		slash = ywCanvasNewImgByPath(s->e, ox * CASE_W, oy * CASE_H, slash_path);
+		wait_update(100000);
+		ywCanvasMoveObjXY(slash, 10, 10);
+		wait_update(100000);
+ 		ywCanvasMoveObjXY(slash, -20, -20);
+		wait_update(100000);
+		ywCanvasRemoveObj(s->e, slash);
+		printf("atk\n");
+	} else {
+		Entity *shield = ywCanvasNewImgByPath(s->e, ox * CASE_W, oy * CASE_H, shield_path);
+
+		printf("shield\n");
+		wait_update(300000);
+		ywCanvasRemoveObj(s->e, shield);
 	}
 	au->has_atk = 1;
 	if (s->is_spe_mode) {
