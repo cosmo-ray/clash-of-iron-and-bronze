@@ -196,8 +196,8 @@ static void end_turn(struct df *s);
 
 static void wait_update(int us)
 {
-	usleep(us);
 	ygUpdateScreen();
+	usleep(us);
 }
 
 static void fill_square(struct df *, int, const char *,
