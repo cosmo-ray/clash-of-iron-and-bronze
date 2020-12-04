@@ -375,7 +375,7 @@ static void fill_square(struct df *s, int range, const char *col,
 		if (diff && diff <= range && check(s, s->map[cy][cx], s->map[iy][ix])) {
 			yeAutoFree Entity *extra = yeCreateInt(type, NULL, NULL);
 
-			s->other_square[ix][iy] = mk_case_rect(s->e, ix, iy, col, extra);
+			s->other_square[iy][ix] = mk_case_rect(s->e, ix, iy, col, extra);
 		}
 	}
 }
