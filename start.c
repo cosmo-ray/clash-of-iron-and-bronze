@@ -550,8 +550,8 @@ void *dungeon_fight_action(int nbArgs, void **args)
 				init_buttom(s, 0, u->spe.name, handle_special);
 		} else if (cx == s->selected_x && cy == s->selected_y) {
 			unselect(s);
-		} else if (s->other_square[cx][cy]) {
-			int action = yeGetIntAt(s->other_square[cx][cy], "extra");
+		} else if (s->other_square[cy][cx]) {
+			int action = yeGetIntAt(s->other_square[cy][cx], "extra");
 			int sx = s->selected_x, sy = s->selected_y;
 			struct unit *su = s->map[sy][sx];
 
