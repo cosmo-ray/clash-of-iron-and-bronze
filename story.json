@@ -112,10 +112,10 @@
 	    " strange dream recently",
 	    "Sudenly someone interupt them",
 	    "-WHAT, who is this whore in your bed",
-	    "She a seer, I ask her for advices",
+	    "-She a seer, I ask her for advices",
 	    "Photine, take his spear:",
-	    "Don't bullshit me",
-	    "that was your last mistake"
+	    "-Don't bullshit me",
+	    " that was your last mistake"
 	],
 	"enemies": [
 	    0, 0,
@@ -141,11 +141,12 @@
     "agolian road": {
 	"pre-battle-txt": [
 	    "Lysandra was on the Road",
-	    "Following her instinct",
+	    "Her instinct as only guide",
 	    "But on the road",
-	    "She mean unfriendly foo",
-	    "We know you kill Photine",
-	    "Ther's a bounty on your head"
+	    "...",
+	    "She meat unfriendly foo",
+	    "- We know you kill Photine",
+	    "  Ther's a bounty on your head"
 	],
 	"enemies": [
 	    0, "spearman",
@@ -209,7 +210,7 @@
 	    "Like What the Fuck",
 	    "By the way they name are",
 	    "They are...", "Hummm",
-	    "I don't kniw...",
+	    "I don't know...",
 	    "Let's call them",
 	    "Grom and Zogzog",
 	    "So they was WTFing together",
@@ -219,7 +220,7 @@
 	"enemies": [
 	    0, 0,
 	    "mycenaean_revenant", 0,
-	    0, 0
+	    0, "spearman_trower"
 	],
 	"win-txt": ["Once the monster was dead",
 		    "They get back to sea",
@@ -236,7 +237,7 @@
 	    "I want to rest, and you 2",
 	    "Must inheric my power",
 	    "I have guide you:",
-	    "using moonshoot in your dream",
+	    "using moon magic",
 	    "I was waiting for you",
 	    "But I have a final test",
 	    "Beat them, and you'll",
@@ -255,15 +256,16 @@
 	    "Lysandra and Yzebel was now",
 	    "The 2 most powerful been",
 	    "in this world",
-	    "Lysandra use her power",
-	    "for herself, she travel all",
-	    "Around the world", "Yzebel",
+	    "Lysandra She had no",
+	    "Idea what was hapening",
+	    "So many question",
+	    "No answer at all",
+	    "Yzebel",
 	    "She used to have dream",
-	    "But now she had only one",
-	    "Thing on her mind",
-	    "And she know how to use her",
-	    "power:",
-	    "Rome delenda est"
+	    "But now",
+	    "All her though was",
+	    "about the same thing:",
+	    "Roma delenda est"
 	]
     }
 }
