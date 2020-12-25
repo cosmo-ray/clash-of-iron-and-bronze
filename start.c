@@ -50,6 +50,10 @@ enum {
 	SPE_HEAL
 };
 
+#define SCREEN_PHONE 0
+#define SCREEN_DESKTOP 1
+int screen_type;
+
 struct special {
 	int range;
 	int type;
@@ -115,6 +119,20 @@ static struct unit_type legioness = {
 	&(struct lvl_bonus){3, 1, 1}
 };
 
+
+static int button_idx(int cx, int cy)
+{
+	if (screen_type == SCREEN_PHONE)
+		return cx;
+	return cy;
+}
+
+static is_on_button(int cx, int cy)
+{
+	if (screen_type == SCREEN_PHONE)
+		return cy == 6;
+	return cx == 4;
+}
 
 static struct unit_type *str_unit_type(const char *s)
 {
@@ -431,7 +449,6 @@ void do_attack(struct df *s, struct unit *au,
 		do_attack(s, u, ou);					\
 		continue;						\
 	}
-	
 
 void *dungeon_fight_action(int nbArgs, void **args)
 {
@@ -454,7 +471,7 @@ void *dungeon_fight_action(int nbArgs, void **args)
 
 	if (s->turn_state != 0) {
 		printf("ai turn\n");
-		/* 
+		/*
 		 * enemy been barbaric, they don't have any notiong of strategic, or group thinking
 		 * they just attack the neerest enemy
 		 */
@@ -518,26 +535,27 @@ void *dungeon_fight_action(int nbArgs, void **args)
 	int cx = yeveMouseX() / CASE_W;
 	int cy = yeveMouseY() / CASE_H;
 
-	if (cx >= 4)
-		return NULL;
-
 	ywCanvasRemoveObj(s->e, s->mouse_over);
 	s->mouse_over = NULL;
 
 	if (yevCheckKeys(eves, YKEY_MOUSEDOWN, 1)) {
 
 		// buttom
-		if (cy == 6) {
-			if (s->bottom_buttom[cx].state == BUTTON_UNPUSH) {
-				s->bottom_buttom[cx].callback_push(s);
-				s->mouse_over = mk_case_rect(s->e, cx, 6, "rgba: 120 120 120 100", NULL);
+		if (is_on_button(cx, cy)) {
+			int idx = button_idx(cx, cy);
+			if (s->bottom_buttom[idx].state == BUTTON_UNPUSH) {
+				s->bottom_buttom[idx].callback_push(s);
+				s->mouse_over =
+					mk_case_rect(s->e, cx, cy,
+						     "rgba: 120 120 120 100",
+						     NULL);
 			}
 			return NULL;
 		}
 
-		if (cy >= 6)
+		if (cx >= 4 || cy >= 6)
 			return NULL;
-		
+
 		if (!s->select_square && can_select_unit(s, cx, cy)) {
 			struct unit *u = s->map[cy][cx];
 
@@ -637,9 +655,18 @@ static void init_buttom(struct df *df, int idx, const char *str, void (*callback
 	if (b->state != NO_BUTTON)
 		return;
 	b->state = BUTTON_UNPUSH;
-	b->rect = ywCanvasNewRectangle(df->e, idx * CASE_W, 6 * CASE_H + 6,
+	int x, y;
+	if (screen_type == SCREEN_PHONE) {
+		x = idx * CASE_W;
+		y =  6 * CASE_H;
+	} else {
+		x = 4 * CASE_W;
+		y =  idx * CASE_H;
+	}
+	b->rect = ywCanvasNewRectangle(df->e, x, y + 6,
 				       CASE_W, CASE_H, "rgba: 40 255 70 255");
-	b->txt = ywCanvasNewTextByStr(df->e, idx * CASE_W + 4, 6 * CASE_H + CASE_H / 2, str);
+	b->txt = ywCanvasNewTextByStr(df->e, x + 4,
+				      y + CASE_H / 2, str);
 	b->callback_push = callback;
 }
 
@@ -657,8 +684,13 @@ void *dungeon_fight_init(int nbArgs, void **args)
 		df.background = "rgba: 255 255 255 255";
 		df.action = dungeon_fight_action;
 	}
-	
+
 	void *ret = ywidNewWidget(df, "canvas");
+	int ww = ywRectW(yeGet(df, "wid-pix"));
+	int wh = ywRectH(yeGet(df, "wid-pix"));
+
+	if (ww > wh)
+		screen_type = SCREEN_DESKTOP;
 	struct df *df_st = calloc(1, sizeof *df_st);
 	Entity *df_data = yeCreateData(df_st, df, "data");
 	yeAutoFree Entity *bg_size = ywSizeCreate(4 * CASE_W, 6 * CASE_H, NULL, NULL);
@@ -697,9 +729,11 @@ void *dungeon_fight_init(int nbArgs, void **args)
 
         /* make grid */
 	for (int i = 0; i < 5; ++i)
-		ywCanvasNewVSegment(df, i * CASE_W, 0, CASE_H * 6, "rgba: 0 0 0 155");
+		ywCanvasNewVSegment(df, i * CASE_W, 0, CASE_H * 6,
+				    "rgba: 0 0 0 155");
 	for (int i = 0; i < 7; ++i)
-		ywCanvasNewHSegment(df, 0, i * CASE_H, CASE_W * 4, "rgba: 0 0 0 155");
+		ywCanvasNewHSegment(df, 0, i * CASE_H, CASE_W * 4,
+				    "rgba: 0 0 0 155");
 	for (int i = 0; i < 4; ++i) {
 		df_st->bottom_buttom[i].state = NO_BUTTON;
 	}
@@ -735,7 +769,8 @@ void *mod_init(int nbArg, void **args)
 		mod.test_dungeon_story["<type>"] = "dungeon-story";
 		mod.test_dungeon_story.file = "story.json";
 		mod.starting_widget = "test_dungeon_story";
-		mod["window size"] = [400, 650];
+		//mod["window size"] = [400, 650];
+		mod["window size"] = [800, 600];
 		mod["window name"] = "test_dungeon_story";
 	}
 	ywidAddSubType(init2);
