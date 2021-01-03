@@ -16,8 +16,13 @@
 void *dungeon_story_init(int nbArgs, void **args)
 {
 	Entity *e = args[0];
-	printf("dungeon_story_init %s\n", yeGetStringAt(e, "file"));
-	yeAutoFree Entity *fe =  ygFileToEnt(YJSON, yeGetStringAt(e, "file"), NULL);
+
+	ygModDir("dungeon-fight");
+	if (!yeGet(e, "file")) {
+		yeCreateString("story.json", e, "file");
+	}
+	yeAutoFree Entity *fe =  ygFileToEnt(YJSON, yeGetStringAt(e, "file"),
+					     NULL);
 	yeAutoFree Entity *lvls = yeCreateArray(NULL, NULL);
 
 	YEntityBlock {
@@ -38,9 +43,10 @@ void *dungeon_story_init(int nbArgs, void **args)
 	for (int i = 0; (cur_s = yeGet(fe, i)) != NULL; ++i) {
 		if (i) {
 			yeReCreateString("nextOnKeyDown", last, "action");
-			tmpe = yeCreateArray(last, "next");			
+			tmpe = yeCreateArray(last, "next");
 			yeCreateString("text-screen", tmpe, "<type>");
-			yeCreateString("rgba: 255 255 255 255", tmpe, "background");
+			yeCreateString("rgba: 255 255 255 255", tmpe,
+				       "background");
 			yeCreateString("nextOnKeyDown", tmpe, "action");
 		}
 		yeGetPush2(cur_s, "pre-battle-txt", tmpe, "text");
@@ -51,6 +57,9 @@ void *dungeon_story_init(int nbArgs, void **args)
 		yeGetPush(cur_s, next, "enemies");
 		printf("callNext: %p\n", ygGet("callNext"));
 		yePushBack(next, ygGet("callNext"), "win-action");
+		if (yeGet(e, "quit")) {
+			yePushBack(next, yeGet(e, "quit"), "quit");
+		}
 		printf("%s\n", yeToCStr(lvls, -1, YE_FORMAT_PRETTY));
 		yeCreateCopy(lvls, next, "lvls");
 		YE_FOREACH(lvls, l) {
@@ -64,10 +73,16 @@ void *dungeon_story_init(int nbArgs, void **args)
 		yeCreateString("text-screen", last, "<type>");
 		yeCreateString("rgba: 255 255 255 255", last, "background");
 		yeGetPush2(cur_s, "win-txt", last, "text");
-		yeCreateString("QuitOnKeyDown", last, "action");
-	}	
+		if (yeGet(e, "end")) {
+			yePushBack(last, yeGet(e, "end"), "to_call");
+			yeCreateString("CallOnKeyDown", last, "action");
+		} else {
+			yeCreateString("QuitOnKeyDown", last, "action");
+		}
+	}
 
 	void *ret = ywidNewWidget(e, "text-screen");
 	/* printf("%s\n", yeToCStr(e, -1, YE_FORMAT_PRETTY)); */
+	ygModDirOut();
 	return ret;
 }

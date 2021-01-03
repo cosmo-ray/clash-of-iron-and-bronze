@@ -112,6 +112,8 @@ static struct unit_type pritestess  = {
 	&(struct lvl_bonus){2, 1, 1}
 };
 
+static const char *mod_path;
+
 static void legioness_rm_pilum(struct df *, struct unit *);
 static struct unit_type legioness = {
 	12, 1, 7, 3, GOOD_SIDE, legioness_path,
@@ -463,8 +465,11 @@ void *dungeon_fight_action(int nbArgs, void **args)
 			printf("%s\n", yeToCStr(yeGet(df, "win-action"), -1, YE_FORMAT_PRETTY));
 			yesCall(yeGet(df, "win-action"), df);
 		} else {
+			if (yeGet(df, "quit"))
+				yesCall(yeGet(df, "quit"), df);
+			else
+				ygTerminate();
 			printf("winner %d\n", winner);
-			ygTerminate();
 		}
 		return (void *)ACTION;
 	}
@@ -670,9 +675,11 @@ static void init_buttom(struct df *df, int idx, const char *str, void (*callback
 	b->callback_push = callback;
 }
 
-static void *kaboum(int nbArgs, void **args)
+void *dungeon_fight_kaboum(int nbArgs, void **args)
 {
+	printf("\nKABOUM !!!!\n");
 	ywSetTurnLengthOverwrite(old_tl);
+	ygModDirOut();
 	return NULL;
 }
 
@@ -680,9 +687,11 @@ void *dungeon_fight_init(int nbArgs, void **args)
 {
 	Entity *df = args[0];
 
+	ygModDir("dungeon-fight");
 	YEntityBlock {
 		df.background = "rgba: 255 255 255 255";
 		df.action = dungeon_fight_action;
+		df.destroy = dungeon_fight_kaboum;
 	}
 
 	void *ret = ywidNewWidget(df, "canvas");
