@@ -677,7 +677,6 @@ static void init_buttom(struct df *df, int idx, const char *str, void (*callback
 
 void *dungeon_fight_kaboum(int nbArgs, void **args)
 {
-	printf("\nKABOUM !!!!\n");
 	ywSetTurnLengthOverwrite(old_tl);
 	ygModDirOut();
 	return NULL;
