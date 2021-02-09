@@ -50,7 +50,7 @@
 	    "spearman", 0,
 	    "spearman", 0,
 	    0, "spearman_trower"
-	],	
+	],
 	"exclude": ["seer"],
 	"win-txt": [
 	    "after defeating the romans",
@@ -89,7 +89,7 @@
 	    "axeman", 0,
 	    "axeman", 0,
 	    0, "spearman_trower"
-	],	
+	],
 	"exclude": ["seer"],
 	"win-txt": [
 	    "The equipage was now following me",

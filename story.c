@@ -73,8 +73,8 @@ void *dungeon_story_init(int nbArgs, void **args)
 		yeCreateString("text-screen", last, "<type>");
 		yeCreateString("rgba: 255 255 255 255", last, "background");
 		yeGetPush2(cur_s, "win-txt", last, "text");
-		if (yeGet(e, "end")) {
-			yePushBack(last, yeGet(e, "end"), "to_call");
+		if (yeGet(e, "quit")) {
+			yePushBack(last, yeGet(e, "quit"), "to_call");
 			yeCreateString("CallOnKeyDown", last, "action");
 		} else {
 			yeCreateString("QuitOnKeyDown", last, "action");
